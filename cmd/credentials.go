@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -22,19 +20,12 @@ Liza needs access to:
 	- Repositories read
 	- Pull requests read`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var c Config
-		if err := c.Parse(); err != nil {
-			fmt.Println("Unable to read config")
-		}
-
-		fmt.Println(cfgFile)
+		c := ParseConfig()
 
 		c.Username = args[0]
 		c.Token = args[1]
 
-		if err := c.Write(); err != nil {
-			fmt.Println("Unable to save config")
-		}
+		c.Write()
 	},
 }
 

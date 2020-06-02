@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"time"
 
@@ -84,29 +85,32 @@ func toTimeHookFunc() mapstructure.DecodeHookFunc {
 	}
 }
 
-func (c *Config) Parse() error {
+func ParseConfig() Config {
+	var c Config
 	err := viper.Unmarshal(&c, func(config *mapstructure.DecoderConfig) {
-		fmt.Println("configging")
 		config.DecodeHook = toTimeHookFunc()
 	})
 
 	if err != nil {
 		fmt.Println(err)
+		os.Exit(1)
 	}
 
-	return err
+	return c
 }
 
-func (c *Config) Write() error {
-	// TODO Implement writing this
+func (c *Config) Write() {
 	s, err := json.MarshalIndent(c, "", "  ")
+
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		if err := ioutil.WriteFile(viper.ConfigFileUsed(), s, 0644); err != nil {
-			fmt.Println(err)
-		}
+		os.Exit(1)
 	}
 
-	return err
+	if err := ioutil.WriteFile(viper.ConfigFileUsed(), s, 0644); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	return
 }

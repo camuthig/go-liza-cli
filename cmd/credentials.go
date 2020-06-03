@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/ktrysmt/go-bitbucket"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +28,20 @@ Liza needs access to:
 
 		c.Username = args[0]
 		c.Token = args[1]
+
+		b := bitbucket.NewBasicAuth(c.Username, c.Token)
+
+		p, err := b.User.Profile()
+
+		if err != nil {
+			fmt.Println("Unable to log into BitBucket")
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		j := p.(map[string]interface{})
+
+		c.UserUUID = j["uuid"].(string)
 
 		c.Write()
 	},

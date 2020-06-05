@@ -20,7 +20,6 @@ type Config struct {
 }
 
 type Repository struct {
-	UUID         string                 `json:"uuid" mapstructure:"uuid"`
 	Name         string                 `json:"name" mapstructure:"name"`
 	PullRequests map[string]PullRequest `json:"pull_requests" mapstructure:"pull_requests"`
 }

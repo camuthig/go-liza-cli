@@ -14,7 +14,7 @@ var updateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		c := ParseConfig()
 		updateWatchedPullrequests(&c)
-		updatePullRequestActivity(&c)
+		updatePullRequestsActivity(&c)
 		c.Write()
 		fmt.Println("Update completed")
 	},
@@ -45,47 +45,52 @@ func updateWatchedPullrequests(c *Config) {
 
 }
 
-func updatePullRequestActivity(c *Config) {
-	var next string
-
-	for n, r := range c.Repositories {
+func updatePullRequestsActivity(c *Config) {
+	for _, r := range c.Repositories {
 		for _, pr := range r.PullRequests {
-			var updates []PullRequestUpdate
-			var until time.Time
-			if pr.LastRead.Before(pr.LastUpdated) {
-				updates = pr.Updates
-				until = pr.LastUpdated
-			} else {
-				updates = make([]PullRequestUpdate, 0)
-				until = pr.LastRead
-			}
-			for hasNext := true; hasNext; hasNext = (next != "") {
-				var us []PullRequestUpdate
-				us, next = GetPullRequestActivity(*c, n, pr.ID, next)
-
-				for _, u := range us {
-					// Break the loop once it is older than the last user read
-					if u.Date.Before(until) {
-						next = ""
-						break
-					}
-
-					// Ignore updates by this user
-					if u.Author.UUID == c.UserUUID {
-						continue
-					}
-
-					// Ignore approvals if this user is only a reviewer
-					if pr.Author.UUID != c.UserUUID && u.ActivityType == Approval {
-						continue
-					}
-
-					updates = append(updates, u)
-				}
-			}
-
-			pr.Updates = updates
-			pr.LastUpdated = time.Now()
+			updatePullRequestActivity(c, r, pr)
 		}
 	}
+}
+
+func updatePullRequestActivity(c *Config, r *Repository, pr *PullRequest) {
+	var next string
+	var updates []PullRequestUpdate
+	var until time.Time
+
+	if pr.LastRead.Before(pr.LastUpdated) {
+		updates = pr.Updates
+		until = pr.LastUpdated
+	} else {
+		updates = make([]PullRequestUpdate, 0)
+		until = pr.LastRead
+	}
+
+	for hasNext := true; hasNext; hasNext = (next != "") {
+		var us []PullRequestUpdate
+		us, next = GetPullRequestActivity(*c, r.Name, pr.ID, next)
+
+		for _, u := range us {
+			// Break the loop once it is older than the last user read
+			if u.Date.Before(until) {
+				next = ""
+				break
+			}
+
+			// Ignore updates by this user
+			if u.Author.UUID == c.UserUUID {
+				continue
+			}
+
+			// Ignore approvals if this user is only a reviewer
+			if pr.Author.UUID != c.UserUUID && u.ActivityType == Approval {
+				continue
+			}
+
+			updates = append(updates, u)
+		}
+	}
+
+	pr.Updates = updates
+	pr.LastUpdated = time.Now()
 }

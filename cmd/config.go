@@ -13,15 +13,15 @@ import (
 )
 
 type Config struct {
-	UserUUID     string                `json:"user_uuid" mapstructure:"user_uuid"`
-	Username     string                `json:"username" mapstructure:"username"`
-	Token        string                `json:"token" mapstructure:"token"`
-	Repositories map[string]Repository `json:"repositories" mapstructure:"repositories"`
+	UserUUID     string                 `json:"user_uuid" mapstructure:"user_uuid"`
+	Username     string                 `json:"username" mapstructure:"username"`
+	Token        string                 `json:"token" mapstructure:"token"`
+	Repositories map[string]*Repository `json:"repositories" mapstructure:"repositories"`
 }
 
 type Repository struct {
-	Name         string                 `json:"name" mapstructure:"name"`
-	PullRequests map[string]PullRequest `json:"pull_requests" mapstructure:"pull_requests"`
+	Name         string               `json:"name" mapstructure:"name"`
+	PullRequests map[int]*PullRequest `json:"pull_requests" mapstructure:"pull_requests"`
 }
 
 type PullRequest struct {

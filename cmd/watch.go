@@ -11,7 +11,8 @@ import (
 
 // watchCmd represents the watch command
 var watchCmd = &cobra.Command{
-	Use:   "watch",
+	Use:   "watch [name]",
+	Args:  cobra.ExactArgs(1),
 	Short: "Add a repository to your watched list.",
 	Run: func(cmd *cobra.Command, args []string) {
 		n := args[0]

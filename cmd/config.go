@@ -30,8 +30,20 @@ type PullRequest struct {
 	LastRead    time.Time           `json:"last_read" mapstructure:"last_read"`
 	LastUpdated time.Time           `json:"last_updated" mapstructure:"last_updated"`
 	Author      User                `json:"author" mapstructure:"author"`
-	Links       UserLinks           `json:"links" mapstructure:"links"`
+	Links       PullRequestLinks    `json:"links" mapstructure:"links"`
 	Updates     []PullRequestUpdate `json:"updates" mapstructure:"updates"`
+}
+
+func (p PullRequest) UnreadUpdates() int {
+	if p.LastRead.After(p.LastUpdated) {
+		return 0
+	}
+
+	return len(p.Updates)
+}
+
+type PullRequestLinks struct {
+	HTML Link `json:"html" mapstructure:"html"`
 }
 
 type ActivityType string

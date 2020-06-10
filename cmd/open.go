@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -18,7 +20,22 @@ var openCmd = &cobra.Command{
 }
 
 func openPullRequest(c *Config, pr *PullRequest) {
-	exec.Command(os.Getenv("BROWSER"), pr.Links.HTML.Href).Run()
+	var cmd *exec.Cmd
+	if runtime.GOOS == "darwin" {
+		cmd = exec.Command("open", pr.Links.HTML.Href)
+	}
+
+	if runtime.GOOS == "linux" {
+		cmd = exec.Command(os.Getenv("BROWSER"), pr.Links.HTML.Href)
+	}
+
+	if cmd == nil {
+		fmt.Println("Unable to open a browser")
+		os.Exit(1)
+	}
+
+	cmd.Run()
+
 	pr.LastRead = time.Now()
 }
 

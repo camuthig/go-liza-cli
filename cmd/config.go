@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -108,6 +110,77 @@ func ParseConfig() Config {
 	}
 
 	return c
+}
+
+type PullRequestWithRepository struct {
+	PullRequest
+	Repository Repository
+}
+
+func (c *Config) AllPullRequests(repo *string) []PullRequestWithRepository {
+	// Zip up all PRs
+	prs := make([]PullRequestWithRepository, 0)
+	if repo != nil {
+		r, found := c.Repositories[*repo]
+
+		if !found {
+			fmt.Printf("You are not watching the repository %s\n", repo)
+			os.Exit(1)
+		}
+
+		for _, pr := range r.PullRequests {
+			prs = append(prs, PullRequestWithRepository{Repository: *r, PullRequest: *pr})
+		}
+	} else {
+		for _, r := range c.Repositories {
+			for _, pr := range r.PullRequests {
+				prs = append(prs, PullRequestWithRepository{Repository: *r, PullRequest: *pr})
+			}
+		}
+	}
+
+	// Sort them by unread updates, repository name (asc), then ID (desc)
+	sort.Slice(prs, func(i, j int) bool {
+		l := prs[i]
+		r := prs[j]
+
+		if l.UnreadUpdates() == 0 && r.UnreadUpdates() > 0 {
+			return false
+		}
+
+		if l.UnreadUpdates() > 0 && r.UnreadUpdates() == 0 {
+			return true
+		}
+
+		switch strings.Compare(l.Repository.Name, r.Repository.Name) {
+		case -1:
+			return true
+		case 1:
+			return false
+		}
+
+		return l.ID < r.ID
+	})
+
+	return prs
+}
+
+func (c *Config) ChunkPullRequests(size int) [][]PullRequestWithRepository {
+	prs := c.AllPullRequests(nil)
+
+	// Chunk them out
+	var chunked [][]PullRequestWithRepository
+	for i := 0; i < len(prs); i += size {
+		end := i + size
+
+		if end > len(prs) {
+			end = len(prs)
+		}
+
+		chunked = append(chunked, prs[i:end])
+	}
+
+	return chunked
 }
 
 func (c *Config) Write() {

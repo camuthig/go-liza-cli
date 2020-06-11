@@ -75,22 +75,38 @@ func RunForPullRequests(action func(c *Config, pr *PullRequestWithRepository)) f
 	}
 }
 
+func getUnreadPrompt(pr PullRequestWithRepository) string {
+	s := fmt.Sprintf("[%d]", pr.UnreadUpdates())
+	if pr.UnreadUpdates() > 0 {
+		return promptui.Styler(promptui.FGGreen)(s)
+	}
+
+	return s
+}
+
 func selectPullRequests(c *Config, repo *string) (*PullRequestWithRepository, bool) {
 	prs := c.AllPullRequests(repo)
+
 	searcher := func(input string, index int) bool {
 		pr := prs[index]
 		return strings.Contains(strings.ToLower(pr.Title), strings.ToLower(input))
 	}
+
+	funcs := promptui.FuncMap
+	funcs["getUnreadPrompt"] = getUnreadPrompt
+
 	templates := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
-		Active:   "> {{ .Repository.Name }}[{{ .UnreadUpdates }}]: {{ .Title }}",
-		Inactive: "  {{ .Repository.Name }}[{{ .UnreadUpdates }}]: {{ .Title }}",
+		Active:   "> {{ .Repository.Name }}{{ getUnreadPrompt . }}: {{ .Title }}",
+		Inactive: "  {{ .Repository.Name }}{{ getUnreadPrompt .}}: {{ .Title }}",
 		Selected: fmt.Sprintf(`%s {{ .Repository.Name }}: {{ .Title }}`, promptui.IconGood),
 		Details: `Repository: {{.Repository.Name}}
 ID: {{.ID}}
 Link: {{.Links.HTML.Href}}
 Title: {{.Title}}`,
+		FuncMap: funcs,
 	}
+
 	prompt := promptui.Select{
 		Label:     "Pull Requests",
 		Size:      10,

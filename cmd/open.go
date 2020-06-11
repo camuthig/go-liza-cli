@@ -19,7 +19,7 @@ var openCmd = &cobra.Command{
 	Run:       RunForPullRequests(openPullRequest),
 }
 
-func openPullRequest(c *Config, pr *PullRequest) {
+func openPullRequest(c *Config, pr *PullRequestWithRepository) {
 	var cmd *exec.Cmd
 	if runtime.GOOS == "darwin" {
 		cmd = exec.Command("open", pr.Links.HTML.Href)
@@ -36,7 +36,8 @@ func openPullRequest(c *Config, pr *PullRequest) {
 
 	cmd.Run()
 
-	pr.LastRead = time.Now()
+	toUpdate := c.Repositories[pr.Repository.Name].PullRequests[pr.ID]
+	toUpdate.LastRead = time.Now()
 }
 
 func init() {

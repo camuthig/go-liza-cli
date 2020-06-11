@@ -15,8 +15,9 @@ var readCmd = &cobra.Command{
 	Run:       RunForPullRequests(markRead),
 }
 
-func markRead(c *Config, pr *PullRequest) {
-	pr.LastRead = time.Now()
+func markRead(c *Config, pr *PullRequestWithRepository) {
+	toUpdate := c.Repositories[pr.Repository.Name].PullRequests[pr.ID]
+	toUpdate.LastRead = time.Now()
 }
 
 func init() {

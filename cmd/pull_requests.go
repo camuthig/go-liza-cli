@@ -34,7 +34,7 @@ func ValidatePullRequestArgs() func(cmd *cobra.Command, args []string) error {
 	}
 }
 
-func RunForPullRequests(action func(c *Config, pr *PullRequest)) func(cmd *cobra.Command, args []string) {
+func RunForPullRequests(action func(c *Config, pr *PullRequestWithRepository)) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		c := ParseConfig()
 
@@ -83,8 +83,8 @@ func selectPullRequests(c *Config, repo *string) (*PullRequestWithRepository, bo
 	}
 	templates := &promptui.SelectTemplates{
 		Label:    "{{ . }}",
-		Active:   "> {{ .Repository.Name }}: {{ .Title }}",
-		Inactive: "  {{ .Repository.Name }}: {{ .Title }}",
+		Active:   "> {{ .Repository.Name }}[{{ .UnreadUpdates }}]: {{ .Title }}",
+		Inactive: "  {{ .Repository.Name }}[{{ .UnreadUpdates }}]: {{ .Title }}",
 		Selected: fmt.Sprintf(`%s {{ .Repository.Name }}: {{ .Title }}`, promptui.IconGood),
 		Details: `Repository: {{.Repository.Name}}
 ID: {{.ID}}
@@ -115,17 +115,17 @@ Title: {{.Title}}`,
 	return &prs[i], true
 }
 
-func promptPullRequest(c *Config, rName *string) *PullRequest {
+func promptPullRequest(c *Config, rName *string) *PullRequestWithRepository {
 	pr, selected := selectPullRequests(c, rName)
 
 	if !selected {
 		return nil
 	}
 
-	return &pr.PullRequest
+	return pr
 }
 
-func getPullRequest(c *Config, rName string, id int) *PullRequest {
+func getPullRequest(c *Config, rName string, id int) *PullRequestWithRepository {
 	r, found := c.Repositories[rName]
 
 	if !found {
@@ -140,5 +140,5 @@ func getPullRequest(c *Config, rName string, id int) *PullRequest {
 		os.Exit(1)
 	}
 
-	return pr
+	return &PullRequestWithRepository{PullRequest: *pr, Repository: *r}
 }

@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path"
 
 	"github.com/spf13/cobra"
 
@@ -52,12 +51,8 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".liza" (without extension).
-		// NOTE: Setting the path and name didn't find the file for me.
-		// 		see: https://github.com/spf13/viper/issues/390
-		// viper.AddConfigPath(home)
-		// viper.SetConfigName(".liza")
-		viper.SetConfigFile(path.Join(home, ".goliza.json"))
+		viper.AddConfigPath(home)
+		viper.SetConfigName(".goliza")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -66,7 +61,23 @@ func initConfig() {
 	err := viper.ReadInConfig()
 
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		switch err.(type) {
+		case viper.ConfigFileNotFoundError:
+			if cfgFile != "" {
+				fmt.Println(err.Error())
+				os.Exit(1)
+			}
+
+			if e := viper.SafeWriteConfig(); e != nil {
+				fmt.Println("Unable to initialize config file")
+				fmt.Println(e)
+				os.Exit(1)
+			}
+
+			viper.ReadInConfig()
+		default:
+			fmt.Println("Error reading config file")
+			os.Exit(1)
+		}
 	}
 }

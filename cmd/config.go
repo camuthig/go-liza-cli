@@ -124,7 +124,7 @@ func (c *Config) AllPullRequests(repo *string) []PullRequestWithRepository {
 		r, found := c.Repositories[*repo]
 
 		if !found {
-			fmt.Printf("You are not watching the repository %s\n", repo)
+			fmt.Printf("You are not watching the repository %s\n", *repo)
 			os.Exit(1)
 		}
 
@@ -192,6 +192,7 @@ func (c *Config) Write() {
 	}
 
 	if err := ioutil.WriteFile(viper.ConfigFileUsed(), s, 0644); err != nil {
+		fmt.Println("Unable to write config file")
 		fmt.Println(err)
 		os.Exit(1)
 	}

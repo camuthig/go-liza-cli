@@ -37,6 +37,10 @@ func GetWatchedPullRequests(config Config, repo string) []*PullRequest {
 	var prs []*PullRequest
 	err = mapstructure.Decode(m["values"], &prs)
 
+	for _, pr := range prs {
+		pr.LastRead = time.Now()
+	}
+
 	if err != nil {
 		fmt.Printf("Error reading pull requests for repository %s\n", repo)
 		fmt.Println(err)

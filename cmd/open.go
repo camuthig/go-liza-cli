@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -37,7 +36,7 @@ func openPullRequest(c *Config, pr *PullRequestWithRepository) {
 	cmd.Run()
 
 	toUpdate := c.Repositories[pr.Repository.Name].PullRequests[pr.ID]
-	toUpdate.LastRead = time.Now()
+	toUpdate.MarkRead()
 }
 
 func init() {

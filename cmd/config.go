@@ -27,21 +27,43 @@ type Repository struct {
 }
 
 type PullRequest struct {
-	ID          int                 `json:"id" mapstructure:"id"`
-	Title       string              `json:"title" mapstructure:"title"`
-	LastRead    time.Time           `json:"last_read" mapstructure:"last_read"`
-	LastUpdated time.Time           `json:"last_updated" mapstructure:"last_updated"`
-	Author      User                `json:"author" mapstructure:"author"`
-	Links       PullRequestLinks    `json:"links" mapstructure:"links"`
-	Updates     []PullRequestUpdate `json:"updates" mapstructure:"updates"`
+	ID                 int                 `json:"id" mapstructure:"id"`
+	Title              string              `json:"title" mapstructure:"title"`
+	ReadAt             time.Time           `json:"read_at" mapstructure:"read_at"`
+	PreviouslyReadAt   time.Time           `json:"previously_read_at" mapstructure:"previously_read_at"`
+	LastUpdated        time.Time           `json:"last_updated" mapstructure:"last_updated"`
+	Author             User                `json:"author" mapstructure:"author"`
+	Links              PullRequestLinks    `json:"links" mapstructure:"links"`
+	UnreadUpdatesCount int                 `json:"unread_updates_count" mapstructure:"unread_updates_count"`
+	Updates            []PullRequestUpdate `json:"updates" mapstructure:"updates"`
 }
 
-func (p PullRequest) UnreadUpdates() int {
-	if p.LastRead.After(p.LastUpdated) {
-		return 0
+func (p *PullRequest) MarkRead() {
+	p.UnreadUpdatesCount = 0
+	p.PreviouslyReadAt = p.ReadAt
+	p.ReadAt = time.Now()
+}
+
+func (p *PullRequest) MarkUnread(c *Config) {
+	p.ReadAt = p.PreviouslyReadAt
+	p.UnreadUpdatesCount = p.CountUnread(c)
+}
+
+func (p PullRequest) CountUnread(c *Config) int {
+	unread := 0
+	for _, u := range p.Updates {
+		if u.Date.Before(p.ReadAt) {
+			break
+		}
+
+		p.Updates = append(p.Updates, u)
+
+		if u.Author.UUID != c.UserUUID {
+			unread++
+		}
 	}
 
-	return len(p.Updates)
+	return unread
 }
 
 type PullRequestLinks struct {
@@ -144,11 +166,11 @@ func (c *Config) AllPullRequests(repo *string) []PullRequestWithRepository {
 		l := prs[i]
 		r := prs[j]
 
-		if l.UnreadUpdates() == 0 && r.UnreadUpdates() > 0 {
+		if l.UnreadUpdatesCount == 0 && r.UnreadUpdatesCount > 0 {
 			return false
 		}
 
-		if l.UnreadUpdates() > 0 && r.UnreadUpdates() == 0 {
+		if l.UnreadUpdatesCount > 0 && r.UnreadUpdatesCount == 0 {
 			return true
 		}
 

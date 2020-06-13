@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"time"
-
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +15,7 @@ var readCmd = &cobra.Command{
 
 func markRead(c *Config, pr *PullRequestWithRepository) {
 	toUpdate := c.Repositories[pr.Repository.Name].PullRequests[pr.ID]
-	toUpdate.LastRead = time.Now()
+	toUpdate.MarkRead()
 }
 
 func init() {

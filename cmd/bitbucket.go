@@ -38,7 +38,8 @@ func GetWatchedPullRequests(config Config, repo string) []*PullRequest {
 	err = mapstructure.Decode(m["values"], &prs)
 
 	for _, pr := range prs {
-		pr.LastRead = time.Now()
+		pr.ReadAt = time.Now()
+		pr.PreviouslyReadAt = pr.ReadAt
 	}
 
 	if err != nil {

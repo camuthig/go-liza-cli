@@ -55,31 +55,17 @@ func updatePullRequestsActivity(c *Config) {
 
 func updatePullRequestActivity(c *Config, r *Repository, pr *PullRequest) {
 	var next string
-	var updates []PullRequestUpdate
-	var until time.Time
-
-	if pr.LastRead.Before(pr.LastUpdated) {
-		updates = pr.Updates
-		until = pr.LastUpdated
-	} else {
-		updates = make([]PullRequestUpdate, 0)
-		until = pr.LastRead
-	}
+	var latest []PullRequestUpdate
 
 	for hasNext := true; hasNext; hasNext = (next != "") {
 		var us []PullRequestUpdate
 		us, next = GetPullRequestActivity(*c, r.Name, pr.ID, next)
 
 		for _, u := range us {
-			// Break the loop once it is older than the last user read
-			if u.Date.Before(until) {
+			// Break the loop once it is older than the last updated time
+			if u.Date.Before(pr.LastUpdated) {
 				next = ""
 				break
-			}
-
-			// Ignore updates by this user
-			if u.Author.UUID == c.UserUUID {
-				continue
 			}
 
 			// Ignore approvals if this user is only a reviewer
@@ -87,10 +73,11 @@ func updatePullRequestActivity(c *Config, r *Repository, pr *PullRequest) {
 				continue
 			}
 
-			updates = append(updates, u)
+			latest = append(latest, u)
 		}
 	}
 
-	pr.Updates = updates
+	pr.Updates = append(latest, pr.Updates...)
 	pr.LastUpdated = time.Now()
+	pr.UnreadUpdatesCount = pr.CountUnread(c)
 }

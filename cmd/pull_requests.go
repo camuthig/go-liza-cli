@@ -76,8 +76,8 @@ func RunForPullRequests(action func(c *Config, pr *PullRequestWithRepository)) f
 }
 
 func getUnreadPrompt(pr PullRequestWithRepository) string {
-	s := fmt.Sprintf("[%d]", pr.UnreadUpdates())
-	if pr.UnreadUpdates() > 0 {
+	s := fmt.Sprintf("[%d]", pr.UnreadUpdatesCount)
+	if pr.UnreadUpdatesCount > 0 {
 		return promptui.Styler(promptui.FGGreen)(s)
 	}
 

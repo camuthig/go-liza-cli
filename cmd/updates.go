@@ -27,7 +27,7 @@ to quickly create a Cobra application.`,
 			count := 0
 			for _, r := range c.Repositories {
 				for _, pr := range r.PullRequests {
-					count += pr.UnreadUpdates()
+					count += pr.UnreadUpdatesCount
 				}
 			}
 
@@ -45,7 +45,7 @@ to quickly create a Cobra application.`,
 				if len(title) > 35 {
 					title = title[0:35] + "..."
 				}
-				t.AppendRow(table.Row{r.Name, title, pr.UnreadUpdates(), pr.LastUpdated, pr.LastRead, pr.Links.HTML.Href})
+				t.AppendRow(table.Row{r.Name, title, pr.UnreadUpdatesCount, pr.LastUpdated, pr.ReadAt, pr.Links.HTML.Href})
 			}
 		}
 

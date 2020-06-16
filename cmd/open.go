@@ -35,8 +35,7 @@ func openPullRequest(c *Config, pr *PullRequestWithRepository) {
 
 	cmd.Run()
 
-	toUpdate := c.Repositories[pr.Repository.Name].PullRequests[pr.ID]
-	toUpdate.MarkRead()
+	pr.MarkRead()
 }
 
 func init() {

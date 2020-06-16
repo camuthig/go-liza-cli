@@ -14,10 +14,11 @@ var readCmd = &cobra.Command{
 }
 
 func markRead(c *Config, pr *PullRequestWithRepository) {
-	toUpdate := c.Repositories[pr.Repository.Name].PullRequests[pr.ID]
-	toUpdate.MarkRead()
+	pr.MarkRead()
 }
 
 func init() {
 	rootCmd.AddCommand(readCmd)
+
+	readCmd.Flags().BoolVarP(&ForAllPullRequests, "all", "a", false, "Mark all pull requests as read.")
 }

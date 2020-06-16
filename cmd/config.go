@@ -135,8 +135,8 @@ func ParseConfig() Config {
 }
 
 type PullRequestWithRepository struct {
-	PullRequest
-	Repository Repository
+	*PullRequest
+	Repository *Repository
 }
 
 func (c *Config) AllPullRequests(repo *string) []PullRequestWithRepository {
@@ -151,12 +151,12 @@ func (c *Config) AllPullRequests(repo *string) []PullRequestWithRepository {
 		}
 
 		for _, pr := range r.PullRequests {
-			prs = append(prs, PullRequestWithRepository{Repository: *r, PullRequest: *pr})
+			prs = append(prs, PullRequestWithRepository{Repository: r, PullRequest: pr})
 		}
 	} else {
 		for _, r := range c.Repositories {
 			for _, pr := range r.PullRequests {
-				prs = append(prs, PullRequestWithRepository{Repository: *r, PullRequest: *pr})
+				prs = append(prs, PullRequestWithRepository{Repository: r, PullRequest: pr})
 			}
 		}
 	}

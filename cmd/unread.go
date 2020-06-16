@@ -14,10 +14,11 @@ var unreadCmd = &cobra.Command{
 }
 
 func unmarkRead(c *Config, pr *PullRequestWithRepository) {
-	toUpdate := c.Repositories[pr.Repository.Name].PullRequests[pr.ID]
-	toUpdate.MarkUnread(c)
+	pr.MarkUnread(c)
 }
 
 func init() {
 	rootCmd.AddCommand(unreadCmd)
+
+	unreadCmd.Flags().BoolVarP(&ForAllPullRequests, "all", "a", false, "Mark all pull requests as unread.")
 }

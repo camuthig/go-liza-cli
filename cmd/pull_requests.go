@@ -11,6 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var ForAllPullRequests bool
+
 func ValidatePullRequestArgs() func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		if err := cobra.MaximumNArgs(2)(cmd, args); err != nil {
@@ -58,6 +60,15 @@ func RunForPullRequests(action func(c *Config, pr *PullRequestWithRepository)) f
 			prID, _ := strconv.Atoi(args[1])
 
 			action(&c, getPullRequest(&c, *rName, prID))
+
+			c.Write()
+			return
+		}
+
+		if ForAllPullRequests {
+			for _, pr := range c.AllPullRequests(rName) {
+				action(&c, &pr)
+			}
 
 			c.Write()
 			return
@@ -142,6 +153,19 @@ func promptPullRequest(c *Config, rName *string) *PullRequestWithRepository {
 }
 
 func getPullRequest(c *Config, rName string, id int) *PullRequestWithRepository {
+	repo := getRepo(c, rName)
+
+	pr, found := repo.PullRequests[id]
+
+	if !found {
+		fmt.Printf("Pull request %d not found", id)
+		os.Exit(1)
+	}
+
+	return &PullRequestWithRepository{PullRequest: pr, Repository: repo}
+}
+
+func getRepo(c *Config, rName string) *Repository {
 	r, found := c.Repositories[rName]
 
 	if !found {
@@ -149,12 +173,5 @@ func getPullRequest(c *Config, rName string, id int) *PullRequestWithRepository 
 		os.Exit(1)
 	}
 
-	pr, found := r.PullRequests[id]
-
-	if !found {
-		fmt.Printf("Pull request %d not found", id)
-		os.Exit(1)
-	}
-
-	return &PullRequestWithRepository{PullRequest: *pr, Repository: *r}
+	return r
 }

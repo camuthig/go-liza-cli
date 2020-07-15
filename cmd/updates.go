@@ -2,9 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/jedib0t/go-pretty/table"
+	"github.com/jedib0t/go-pretty/text"
 	"github.com/spf13/cobra"
 )
 
@@ -35,21 +34,40 @@ to quickly create a Cobra application.`,
 			return
 		}
 
-		t := table.NewWriter()
-		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{"Repository", "Pull Request", "# of Updates", "Last Updated", "Last Read", "Link"})
+		text.EnableColors()
 
 		for _, r := range c.Repositories {
+			fmt.Println(text.Bold.Sprint(r.Name))
+
 			for _, pr := range r.PullRequests {
-				title := pr.Title
-				if len(title) > 35 {
-					title = title[0:35] + "..."
+				if pr.UnreadUpdatesCount == 0 {
+					continue
 				}
-				t.AppendRow(table.Row{r.Name, title, pr.UnreadUpdatesCount, pr.LastUpdated, pr.ReadAt, pr.Links.HTML.Href})
+
+				approvals := 0
+				comments := 0
+				updates := 0
+				for _, u := range pr.Updates {
+					if u.Date.Before(pr.ReadAt) {
+						continue
+					}
+
+					if u.ActivityType == Update {
+						updates++
+					} else if u.ActivityType == Approval {
+						approvals++
+					} else if u.ActivityType == Comment {
+						comments++
+					}
+				}
+
+				fmt.Printf("    [%d] %s\n", pr.ID, pr.Title)
+				fmt.Printf("        %s\n", pr.Links.HTML.Href)
+				fmt.Println(text.Colors{text.Bold}.Sprintf("        Updates: %d", updates))
+				fmt.Println(text.Colors{text.Bold, text.FgGreen}.Sprintf("        Approvals: %d", approvals))
+				fmt.Println(text.Colors{text.Bold, text.FgBlue}.Sprintf("        Comments: %d", comments))
 			}
 		}
-
-		t.Render()
 	},
 }
 

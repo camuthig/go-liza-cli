@@ -52,7 +52,7 @@ func initConfig() {
 		}
 
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".goliza")
+		viper.SetConfigName(".liza")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

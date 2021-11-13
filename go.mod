@@ -3,6 +3,7 @@ module github.com/camuthig/lizacli
 go 1.14
 
 require (
+	github.com/gen2brain/beeep v0.0.0-20200526185328-e9c15c258e28
 	github.com/go-openapi/strfmt v0.19.5 // indirect
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/ktrysmt/go-bitbucket v0.5.7

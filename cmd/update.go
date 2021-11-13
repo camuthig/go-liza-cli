@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gen2brain/beeep"
 	"github.com/spf13/cobra"
 )
 
@@ -41,6 +42,11 @@ func updateWatchedPullrequests(c *Config) {
 
 		r.PullRequests = latest
 		c.Repositories[n] = r
+	}
+
+	err := beeep.Notify("Updated pull requests", "Do you hear me?!?", "assets/bitbucket.png")
+	if err != nil {
+		panic(err)
 	}
 
 }

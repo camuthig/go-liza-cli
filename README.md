@@ -12,6 +12,11 @@ To use Liza CLI you will need an app password configured in BitBucket. This pass
 
 # Installation
 
+## Pre-built Binary
+
+Pre-build binaries can be found for most architectures of Windows, Linux, and MacOS. Visit the [releases](https://github.com/camuthig/go-liza-cli/releases)
+page to find the latest release and download the binary.
+
 ## Building Manually
 
 Requires Go 1.17.0+

@@ -58,7 +58,7 @@ func (p PullRequest) CountUnread(c *Config) int {
 
 		p.Updates = append(p.Updates, u)
 
-		if u.Author.UUID != c.UserUUID {
+		if u.IsNewToUserUUID(c.UserUUID, p.ReadAt) {
 			unread++
 		}
 	}
@@ -82,6 +82,18 @@ type PullRequestUpdate struct {
 	Date         time.Time    `json:"date" mapstructure:"date"`
 	ActivityType ActivityType `json:"activity_type" mapstructure:"activity_type"`
 	Author       User         `json:"author" mapstructure:"author"`
+}
+
+func (pru PullRequestUpdate) IsNewToUserUUID(uuid string, t time.Time) bool {
+	if pru.Date.Before(t) {
+		return false
+	}
+
+	if pru.Author.UUID == uuid {
+		return false
+	}
+
+	return true
 }
 
 type User struct {

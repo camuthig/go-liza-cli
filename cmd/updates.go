@@ -48,7 +48,7 @@ to quickly create a Cobra application.`,
 				comments := 0
 				updates := 0
 				for _, u := range pr.Updates {
-					if u.Date.Before(pr.ReadAt) {
+					if !u.IsNewToUserUUID(c.UserUUID, pr.ReadAt) {
 						continue
 					}
 

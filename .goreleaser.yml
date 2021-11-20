@@ -10,10 +10,15 @@ builds:
     goos:
       - linux
       - darwin
+      - windows
+    ignore:
+      - goos: windows
+        goarch: arm64
 archives:
   - replacements:
       darwin: Darwin
       linux: Linux
+      windows: Windows
       386: i386
       amd64: x86_64
 checksum:
@@ -21,6 +26,7 @@ checksum:
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 changelog:
+  use: github
   sort: asc
   filters:
     exclude:

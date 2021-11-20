@@ -74,8 +74,8 @@ type ActivityType string
 
 const (
 	Update   ActivityType = "update"
-	Approval              = "approval"
-	Comment               = "comment"
+	Approval ActivityType = "approval"
+	Comment  ActivityType = "comment"
 )
 
 type PullRequestUpdate struct {

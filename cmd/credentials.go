@@ -39,9 +39,7 @@ Liza needs access to:
 			os.Exit(1)
 		}
 
-		j := p.(map[string]interface{})
-
-		c.UserUUID = j["uuid"].(string)
+		c.UserUUID = p.Uuid
 
 		c.Write()
 	},

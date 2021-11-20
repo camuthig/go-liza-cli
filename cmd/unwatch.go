@@ -14,9 +14,7 @@ var unwatchCmd = &cobra.Command{
 
 		n := args[0]
 
-		if _, ok := c.Repositories[n]; ok {
-			delete(c.Repositories, n)
-		}
+		delete(c.Repositories, n)
 
 		c.Write()
 	},
